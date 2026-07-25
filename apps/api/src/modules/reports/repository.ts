@@ -103,7 +103,7 @@ export async function findValuation(filters: { brandId?: string }) {
 
   // Execute raw SQL via pgClient to avoid Drizzle transformation issues
   const { pgClient } = await import('../../db/index.js');
-  const rows = await pgClient.unsafe(sqlStr, params);
+  const rows = await pgClient.unsafe(sqlStr, params as any);
 
   return rows as unknown as Array<{
     brand_id: string;

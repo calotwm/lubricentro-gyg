@@ -174,16 +174,16 @@ export async function importRows(
             .values(productData as any)
             .returning({ id: products.id });
 
-          // Insert price if present
+          // Insert price if present (use raw SQL via execute to avoid Date serialization)
           if (row.price) {
             const priceValue = parseFloat(row.price);
             if (!isNaN(priceValue) && priceValue > 0) {
-              await tx.insert(productPrices).values({
-                productId: newProduct.id,
-                priceType: 'list',
-                price: priceValue.toFixed(2),
-                effectiveFrom: new Date().toISOString(),
-              } as any);
+              const capped = Math.min(priceValue, 9999999999.99);
+              const priceStr = capped.toFixed(2);
+              await tx.execute(
+                sql`INSERT INTO product_prices (product_id, price_type, price, effective_from)
+                    VALUES (${newProduct.id}, 'list', ${priceStr}, NOW())`
+              );
             }
           }
 

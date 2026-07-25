@@ -2,7 +2,10 @@
   "name": "lubricentro-gyg",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "build": "npm run build -w packages/shared",
     "build:shared": "npm run build -w packages/shared",
@@ -26,5 +29,12 @@
     "typescript": "^7.0.0",
     "eslint": "^10.0.0",
     "prettier": "^3.9.0"
+  },
+  "allowScripts": {
+    "esbuild@0.19.12": true,
+    "esbuild@0.18.20": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.1": true,
+    "bcrypt@6.0.0": true
   }
 }

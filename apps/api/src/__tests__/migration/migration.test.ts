@@ -7,22 +7,22 @@ describe('Migration — parse', () => {
   describe('detectSheetType', () => {
     it('should detect oil-brand sheet by VISCOSIDAD header', () => {
       const headers = ['PRODUCTO', 'VISCOSIDAD', 'CAPACIDAD', 'PRECIO'];
-      expect(detectSheetType(headers)).toBe('oil-brand');
+      expect(detectSheetType('test', headers)).toBe('oil-brand');
     });
 
     it('should detect battery sheet by CCA + VOLTAJE headers', () => {
       const headers = ['PRODUCTO', 'CCA', 'VOLTAJE', 'DIMENSIONES'];
-      expect(detectSheetType(headers)).toBe('battery');
+      expect(detectSheetType('test', headers)).toBe('battery');
     });
 
     it('should detect filter sheet by CODIGO CRUZ header', () => {
       const headers = ['PRODUCTO', 'CODIGO CRUZ', 'MARCA', 'PRECIO'];
-      expect(detectSheetType(headers)).toBe('filter');
+      expect(detectSheetType('test', headers)).toBe('filter');
     });
 
     it('should default to general for unrecognized headers', () => {
       const headers = ['PRODUCTO', 'PRECIO', 'MARCA'];
-      expect(detectSheetType(headers)).toBe('general');
+      expect(detectSheetType('test', headers)).toBe('general');
     });
   });
 });
