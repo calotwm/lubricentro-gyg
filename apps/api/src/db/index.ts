@@ -68,5 +68,13 @@ export async function runMigrations(): Promise<void> {
     console.log('Default admin user created (admin / admin123)');
   }
 
+  // Seed sample brands + categories if DB is empty
+  const [catCount] = await pgClient`SELECT COUNT(*)::int as cnt FROM categories`;
+  if (catCount?.cnt === 0) {
+    await pgClient`INSERT INTO categories (name) VALUES ('motor-oil'), ('filter'), ('battery'), ('general')`;
+    await pgClient`INSERT INTO brands (name) VALUES ('VALVOLINE'), ('TOTAL'), ('MOBIL'), ('CASTROL'), ('YPF'), ('SHELL'), ('MOTUL')`;
+    console.log('Sample categories and brands created');
+  }
+
   console.log('Migrations applied');
 }
