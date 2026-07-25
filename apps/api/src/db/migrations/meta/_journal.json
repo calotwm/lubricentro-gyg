@@ -1,0 +1,32 @@
+{
+  "version": "1",
+  "dialect": "postgresql",
+  "tables": {
+    "brands": {
+      "name": "brands",
+      "schema": "",
+      "columns": {
+        "id": { "name": "id", "type": "uuid", "primaryKey": true, "notNull": true, "default": "gen_random_uuid()" },
+        "name": { "name": "name", "type": "varchar(100)", "primaryKey": false, "notNull": true },
+        "notes": { "name": "notes", "type": "text", "primaryKey": false, "notNull": false }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "brands_name_unique": { "name": "brands_name_unique", "columns": ["name"], "nullsNotDistinct": false }
+      }
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {},
+    "indexes": {}
+  }
+}

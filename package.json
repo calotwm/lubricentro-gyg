@@ -1,0 +1,30 @@
+{
+  "name": "lubricentro-gyg",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "build": "npm run build -w packages/shared",
+    "build:shared": "npm run build -w packages/shared",
+    "dev:api": "npm run dev -w apps/api",
+    "dev:web": "npm run dev -w apps/web",
+    "test": "npm run build:shared && npm run test --workspaces --if-present",
+    "test:shared": "npm run test -w packages/shared",
+    "test:api": "npm run test -w apps/api",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.0",
+    "eslint": "^10.0.0",
+    "prettier": "^3.9.0"
+  }
+}
