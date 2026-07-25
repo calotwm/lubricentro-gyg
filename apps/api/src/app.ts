@@ -104,8 +104,12 @@ export async function startApp(): Promise<void> {
       await runMigrations();
     }
     await app.listen({ port, host });
+    console.log(`Server listening on http://${host}:${port}`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);
   }
 }
+
+// Auto-start when executed directly
+startApp();
