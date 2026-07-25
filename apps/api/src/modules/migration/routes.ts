@@ -9,7 +9,22 @@ export async function migrationRoutes(fastify: FastifyInstance): Promise<void> {
   fastify.addHook('preHandler', roleGuard('admin'));
 
   // POST /api/migration/import — upload Excel and trigger import
-  fastify.post('/import', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/import', {
+    schema: {
+      consumes: ['multipart/form-data'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            sheetsProcessed: { type: 'integer' },
+            rowsImported: { type: 'integer' },
+            errors: { type: 'array' },
+            warnings: { type: 'array' },
+          },
+        },
+      },
+    },
+  }, async (request: FastifyRequest, reply: FastifyReply) => {
     // Read multipart file
     const file = await request.file();
 
