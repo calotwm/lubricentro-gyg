@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createUserSchema, updateUserSchema, userResponse } from './user';
+import { createUserSchema, updateUserSchema, userResponse } from './user.js';
 
 describe('createUserSchema', () => {
   it('accepts valid user creation', () => {

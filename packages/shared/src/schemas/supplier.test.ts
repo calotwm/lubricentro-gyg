@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   supplierSchema,
   productSupplierSchema,
-} from './supplier';
+} from './supplier.js';
 
 describe('supplierSchema', () => {
   it('accepts valid supplier with name only', () => {

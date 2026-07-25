@@ -1,5 +1,5 @@
-export { PRODUCT_TYPES } from '../schemas/product';
-export { PRICE_TYPES } from '../schemas/price';
-export { MOVEMENT_TYPES } from '../schemas/stock';
-export { USER_ROLES } from '../schemas/user';
-export { CATEGORY_NAMES } from '../schemas/category';
+export { PRODUCT_TYPES } from '../schemas/product.js';
+export { PRICE_TYPES } from '../schemas/price.js';
+export { MOVEMENT_TYPES } from '../schemas/stock.js';
+export { USER_ROLES } from '../schemas/user.js';
+export { CATEGORY_NAMES } from '../schemas/category.js';

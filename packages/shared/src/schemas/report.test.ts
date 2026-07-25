@@ -3,7 +3,7 @@ import {
   movementReportFilterSchema,
   valuationFilterSchema,
   valuationSummary,
-} from './report';
+} from './report.js';
 
 describe('movementReportFilterSchema', () => {
   it('accepts empty filter with defaults', () => {

@@ -4,13 +4,13 @@ export type {
   CreateBrandInput,
   UpdateBrandInput,
   BrandResponse,
-} from '../schemas/brand';
+} from '../schemas/brand.js';
 
 export type {
   CategorySchema,
   CreateCategoryInput,
   CategoryResponse,
-} from '../schemas/category';
+} from '../schemas/category.js';
 
 export type {
   BaseProductSchema,
@@ -20,13 +20,13 @@ export type {
   ProductFilterSchema,
   CrossRef,
   Specifications,
-} from '../schemas/product';
+} from '../schemas/product.js';
 
 export type {
   ProductPriceSchema,
   CreatePriceInput,
   PriceResponse,
-} from '../schemas/price';
+} from '../schemas/price.js';
 
 export type {
   StockMovementSchema,
@@ -34,19 +34,19 @@ export type {
   MovementResponse,
   StockFilterSchema,
   MovementFilterSchema,
-} from '../schemas/stock';
+} from '../schemas/stock.js';
 
 export type {
   LoginSchema,
   LoginResponse,
   TokenPayload,
-} from '../schemas/auth';
+} from '../schemas/auth.js';
 
 export type {
   CreateUserSchema,
   UpdateUserSchema,
   UserResponse,
-} from '../schemas/user';
+} from '../schemas/user.js';
 
 export type {
   SupplierSchema,
@@ -54,7 +54,7 @@ export type {
   UpdateSupplierInput,
   SupplierResponse,
   ProductSupplierSchema,
-} from '../schemas/supplier';
+} from '../schemas/supplier.js';
 
 export type {
   MovementReportFilter,
@@ -62,4 +62,4 @@ export type {
   ReportMovementRow,
   ValuationRow,
   ValuationSummary,
-} from '../schemas/report';
+} from '../schemas/report.js';

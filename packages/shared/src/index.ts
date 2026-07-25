@@ -4,14 +4,14 @@ export {
   createBrandInput,
   updateBrandInput,
   brandResponse,
-} from './schemas/brand';
+} from './schemas/brand.js';
 
 export {
   categorySchema,
   createCategoryInput,
   categoryResponse,
   CATEGORY_NAMES,
-} from './schemas/category';
+} from './schemas/category.js';
 
 export {
   baseProductSchema,
@@ -22,14 +22,14 @@ export {
   crossRefSchema,
   specificationsSchema,
   PRODUCT_TYPES,
-} from './schemas/product';
+} from './schemas/product.js';
 
 export {
   productPriceSchema,
   createPriceInput,
   priceResponse,
   PRICE_TYPES,
-} from './schemas/price';
+} from './schemas/price.js';
 
 export {
   stockMovementSchema,
@@ -38,20 +38,20 @@ export {
   stockFilterSchema,
   movementFilterSchema,
   MOVEMENT_TYPES,
-} from './schemas/stock';
+} from './schemas/stock.js';
 
 export {
   loginSchema,
   loginResponse,
   tokenPayloadSchema,
-} from './schemas/auth';
+} from './schemas/auth.js';
 
 export {
   createUserSchema,
   updateUserSchema,
   userResponse,
   USER_ROLES,
-} from './schemas/user';
+} from './schemas/user.js';
 
 export {
   supplierSchema,
@@ -59,7 +59,7 @@ export {
   updateSupplierInput,
   supplierResponse,
   productSupplierSchema,
-} from './schemas/supplier';
+} from './schemas/supplier.js';
 
 export {
   movementReportFilterSchema,
@@ -67,7 +67,7 @@ export {
   reportMovementRow,
   valuationRow,
   valuationSummary,
-} from './schemas/report';
+} from './schemas/report.js';
 
 // Types (re-export)
 export type {
@@ -109,4 +109,4 @@ export type {
   ReportMovementRow,
   ValuationRow,
   ValuationSummary,
-} from './types/index';
+} from './types/index.js';

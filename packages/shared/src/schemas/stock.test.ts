@@ -3,7 +3,7 @@ import {
   stockMovementSchema,
   createMovementInput,
   movementFilterSchema,
-} from './stock';
+} from './stock.js';
 
 const validMovement = {
   productId: '550e8400-e29b-41d4-a716-446655440000',

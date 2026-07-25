@@ -6,7 +6,7 @@ import {
   productFilterSchema,
   crossRefSchema,
   specificationsSchema,
-} from './product';
+} from './product.js';
 
 const validOilProduct = {
   brandId: '550e8400-e29b-41d4-a716-446655440000',

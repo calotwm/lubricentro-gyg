@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { productPriceSchema, createPriceInput } from './price';
+import { productPriceSchema, createPriceInput } from './price.js';
 
 const validPrice = {
   productId: '550e8400-e29b-41d4-a716-446655440000',

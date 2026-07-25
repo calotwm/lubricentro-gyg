@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { categorySchema, CATEGORY_NAMES } from './category';
+import { categorySchema, CATEGORY_NAMES } from './category.js';
 
 describe('categorySchema', () => {
   it('accepts valid category: motor-oil', () => {
