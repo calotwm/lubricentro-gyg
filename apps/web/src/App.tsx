@@ -11,6 +11,7 @@ import { DashboardPage } from './pages/dashboard/DashboardPage';
 import { StockPage } from './pages/stock/StockPage';
 import { ReportsPage } from './pages/reports/ReportsPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
+import { ImportPage } from './pages/admin/ImportPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -114,6 +115,16 @@ export function App() {
                 <ProtectedRoute>
                   <Layout>
                     <AdminUsersPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/import"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ImportPage />
                   </Layout>
                 </ProtectedRoute>
               }

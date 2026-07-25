@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, Warehouse, FileText, Users } from 'lucide-react';
+import { LayoutDashboard, Package, Warehouse, FileText, Users, Upload } from 'lucide-react';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -7,6 +7,7 @@ const navItems = [
   { to: '/stock', label: 'Stock', icon: Warehouse },
   { to: '/reports', label: 'Reports', icon: FileText },
   { to: '/admin/users', label: 'Users', icon: Users },
+  { to: '/admin/import', label: 'Importar Excel', icon: Upload },
 ];
 
 export function Sidebar() {
