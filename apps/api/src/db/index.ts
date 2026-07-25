@@ -56,5 +56,17 @@ export async function runMigrations(): Promise<void> {
     await pgClient.unsafe(cmd).catch(() => {});
   }
 
+  // Seed default admin user if none exists
+  const [existing] = await pgClient`SELECT COUNT(*)::int as cnt FROM users`;
+  if (existing?.cnt === 0) {
+    const bcrypt = await import('bcrypt');
+    const hash = await bcrypt.hash('admin123', 10);
+    await pgClient`
+      INSERT INTO users (username, email, password_hash, role)
+      VALUES ('admin', 'admin@lubricentro.com', ${hash}, 'admin')
+    `;
+    console.log('Default admin user created (admin / admin123)');
+  }
+
   console.log('Migrations applied');
 }
