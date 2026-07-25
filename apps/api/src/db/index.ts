@@ -22,3 +22,39 @@ export async function checkDbHealth(): Promise<'connected' | 'disconnected'> {
     return 'disconnected';
   }
 }
+
+/**
+ * Run database migrations on startup (production).
+ * Reads the SQL migration file and executes each statement.
+ */
+export async function runMigrations(): Promise<void> {
+  const fs = await import('fs');
+  const path = await import('path');
+  const migrationPath = path.join(process.cwd(), 'apps/api/src/db/migrations/0000_initial_schema.sql');
+  const migrationSQL = fs.readFileSync(migrationPath, 'utf-8');
+  const statements = migrationSQL.split(';').filter(s => s.trim());
+
+  for (const stmt of statements) {
+    try {
+      await pgClient.unsafe(stmt.trim() + ';');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (!msg.includes('already exists')) {
+        console.warn('Migration warning:', msg);
+      }
+    }
+  }
+
+  // Widen columns for imported data
+  for (const cmd of [
+    `ALTER TABLE brands ALTER COLUMN name TYPE varchar(200)`,
+    `ALTER TABLE categories ALTER COLUMN name TYPE varchar(200)`,
+    `ALTER TABLE products ALTER COLUMN name TYPE varchar(500)`,
+    `ALTER TABLE products ALTER COLUMN code TYPE varchar(100)`,
+    `ALTER TABLE products ALTER COLUMN capacity TYPE varchar(100)`,
+  ]) {
+    await pgClient.unsafe(cmd).catch(() => {});
+  }
+
+  console.log('Migrations applied');
+}

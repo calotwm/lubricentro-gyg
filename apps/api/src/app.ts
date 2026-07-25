@@ -7,7 +7,7 @@ import { stockRoutes } from './modules/stock/routes.js';
 import { reportRoutes } from './modules/reports/routes.js';
 import { userRoutes } from './modules/users/routes.js';
 import { migrationRoutes } from './modules/migration/routes.js';
-import { checkDbHealth } from './db/index.js';
+import { checkDbHealth, runMigrations } from './db/index.js';
 
 export async function buildApp(opts?: { logger?: boolean }): Promise<FastifyInstance> {
   const app = Fastify({
@@ -99,6 +99,10 @@ export async function startApp(): Promise<void> {
   const host = '0.0.0.0';
 
   try {
+    // Run migrations on startup (safe to run multiple times)
+    if (process.env.NODE_ENV === 'production') {
+      await runMigrations();
+    }
     await app.listen({ port, host });
   } catch (err) {
     app.log.error(err);
