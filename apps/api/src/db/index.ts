@@ -68,12 +68,26 @@ export async function runMigrations(): Promise<void> {
     console.log('Default admin user created (admin / admin123)');
   }
 
-  // Seed sample brands + categories if DB is empty
-  const [catCount] = await pgClient`SELECT COUNT(*)::int as cnt FROM categories`;
-  if (catCount?.cnt === 0) {
-    await pgClient`INSERT INTO categories (name) VALUES ('motor-oil'), ('filter'), ('battery'), ('general')`;
-    await pgClient`INSERT INTO brands (name) VALUES ('VALVOLINE'), ('TOTAL'), ('MOBIL'), ('CASTROL'), ('YPF'), ('SHELL'), ('MOTUL')`;
-    console.log('Sample categories and brands created');
+  // Seed data if DB is empty (brands empty = first run)
+  const [brandCount] = await pgClient`SELECT COUNT(*)::int as cnt FROM brands`;
+  if (brandCount?.cnt === 0) {
+    // Run seed SQL
+    const seedPath = path.join(process.cwd(), 'apps/api/src/db/migrations/0001_seed_data.sql');
+    if (fs.existsSync(seedPath)) {
+      const seedSQL = fs.readFileSync(seedPath, 'utf-8');
+      const seedStatements = seedSQL.split(';').filter(s => s.trim());
+      for (const stmt of seedStatements) {
+        try {
+          await pgClient.unsafe(stmt.trim() + ';');
+        } catch (err: unknown) {
+          const msg = err instanceof Error ? err.message : String(err);
+          if (!msg.includes('already exists') && !msg.includes('unique constraint')) {
+            console.warn('Seed warning:', msg.substring(0, 120));
+          }
+        }
+      }
+      console.log('Excel data seeded successfully');
+    }
   }
 
   console.log('Migrations applied');
