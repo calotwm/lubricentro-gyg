@@ -1,4 +1,5 @@
 const TOKEN_KEY = 'lubricentro_token';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -71,26 +72,30 @@ async function request<T>(url: string, options: RequestOptions = {}): Promise<T>
   return response.json() as Promise<T>;
 }
 
+function apiUrl(path: string): string {
+  return path.startsWith('http') ? path : `${API_BASE}${path}`;
+}
+
 export const apiClient = {
-  get: <T>(url: string) => request<T>(url),
+  get: <T>(url: string) => request<T>(apiUrl(url)),
 
   post: <T>(url: string, body: unknown) =>
-    request<T>(url, {
+    request<T>(apiUrl(url), {
       method: 'POST',
       body: JSON.stringify(body),
     }),
 
   put: <T>(url: string, body: unknown) =>
-    request<T>(url, {
+    request<T>(apiUrl(url), {
       method: 'PUT',
       body: JSON.stringify(body),
     }),
 
   patch: <T>(url: string, body: unknown) =>
-    request<T>(url, {
+    request<T>(apiUrl(url), {
       method: 'PATCH',
       body: JSON.stringify(body),
     }),
 
-  delete: <T>(url: string) => request<T>(url, { method: 'DELETE' }),
+  delete: <T>(url: string) => request<T>(apiUrl(url), { method: 'DELETE' }),
 };
