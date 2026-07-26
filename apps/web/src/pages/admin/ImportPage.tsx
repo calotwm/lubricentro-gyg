@@ -24,7 +24,7 @@ export function ImportPage() {
     try {
       const fd = new FormData();
       fd.append('file', file);
-      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/migration/import`, {
+      const res = await fetch('/api/migration/import', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: fd,
