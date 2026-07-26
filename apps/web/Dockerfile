@@ -29,9 +29,9 @@ FROM nginx:1.27-alpine AS production
 RUN rm /etc/nginx/conf.d/default.conf
 
 # Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy built static files from builder
+# Copy built static files from builder (relative to repo root)
 COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 
 # Expose port 80
