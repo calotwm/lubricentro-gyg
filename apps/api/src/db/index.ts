@@ -109,14 +109,18 @@ async function runSeedInBackground(): Promise<void> {
     const batch = seedData.products.slice(i, i + 100);
     for (const p of batch) {
       if (!p.id || !p.brandId || !p.categoryId || !p.name) continue;
-      const params = ([
+      let params: any[] = [
         p.id, p.brandId, p.categoryId, p.code ?? null, p.name, p.description ?? null,
         p.capacity ?? null, p.unit || 'unit', p.productType || 'general', p.viscosity ?? null,
         p.crossRefs ? JSON.stringify(p.crossRefs) : null,
         p.specifications ? JSON.stringify(p.specifications) : null,
         p.extras ? JSON.stringify(p.extras) : null,
         p.isActive ?? true, p.currentStock ?? 0, p.minStockThreshold ?? 0
-      ] as any[]).map((v: unknown) => v === undefined ? null : v);
+      ];
+      // postgres.js rejects undefined — replace any rogue undefined with null
+      for (let idx = 0; idx < params.length; idx++) {
+        if (params[idx] === undefined) params[idx] = null;
+      }
       await pgClient.unsafe(
         `INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13::jsonb, $14, $15, $16) ON CONFLICT (id) DO NOTHING`,
         params
@@ -127,7 +131,10 @@ async function runSeedInBackground(): Promise<void> {
 
   for (const pr of seedData.prices) {
     const ef = pr.effectiveFrom || new Date().toISOString();
-    const pParams = [pr.id, pr.productId, pr.priceType, pr.price, ef].map((v: unknown) => v === undefined ? null : v) as any[];
+    let pParams: any[] = [pr.id, pr.productId, pr.priceType, pr.price, ef];
+    for (let idx = 0; idx < pParams.length; idx++) {
+      if (pParams[idx] === undefined) pParams[idx] = null;
+    }
     await pgClient.unsafe(
       `INSERT INTO product_prices (id, product_id, price_type, price, effective_from) VALUES ($1::uuid, $2::uuid, $3, $4, $5::timestamptz) ON CONFLICT (id) DO NOTHING`,
       pParams
