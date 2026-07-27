@@ -70,23 +70,28 @@ export async function runMigrations(): Promise<void> {
 
   // Seed data if products table is empty
   const [productCount] = await pgClient`SELECT COUNT(*)::int as cnt FROM products`;
+  console.log(`Products in DB: ${productCount?.cnt}`);
   if (productCount?.cnt === 0) {
     // Run seed SQL
     const seedPath = path.join(process.cwd(), 'apps/api/src/db/migrations/0001_seed_data.sql');
+    console.log(`Seed file exists: ${fs.existsSync(seedPath)}`);
     if (fs.existsSync(seedPath)) {
       const seedSQL = fs.readFileSync(seedPath, 'utf-8');
       const seedStatements = seedSQL.split(';').filter(s => s.trim());
+      let ok = 0, fail = 0;
       for (const stmt of seedStatements) {
         try {
           await pgClient.unsafe(stmt.trim() + ';');
+          ok++;
         } catch (err: unknown) {
           const msg = err instanceof Error ? err.message : String(err);
+          fail++;
           if (!msg.includes('already exists') && !msg.includes('unique constraint')) {
-            console.warn('Seed warning:', msg.substring(0, 120));
+            console.warn('Seed warning:', msg.substring(0, 150));
           }
         }
       }
-      console.log('Excel data seeded successfully');
+      console.log(`Seed complete: ${ok} OK, ${fail} skipped`);
     }
   }
 
