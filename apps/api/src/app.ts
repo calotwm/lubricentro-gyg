@@ -19,7 +19,7 @@ export async function buildApp(opts?: { logger?: boolean }): Promise<FastifyInst
 
   // CORS
   await app.register(import('@fastify/cors'), {
-    origin: process.env.CORS_ORIGIN === '*' ? true : (process.env.CORS_ORIGIN || 'http://localhost:5173'),
+    origin: true,
     credentials: true,
   });
 
