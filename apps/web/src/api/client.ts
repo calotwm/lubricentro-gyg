@@ -1,5 +1,5 @@
 const TOKEN_KEY = 'lubricentro_token';
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://lubricentroapi-production.up.railway.app';
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
