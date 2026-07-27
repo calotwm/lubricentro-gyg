@@ -68,66 +68,66 @@ export async function runMigrations(): Promise<void> {
     console.log('Default admin user created (admin / admin123)');
   }
 
-  // Seed data if products table is empty
+  // Seed data if products table is empty (run in background for faster startup)
   const [productCount] = await pgClient`SELECT COUNT(*)::int as cnt FROM products`;
   console.log(`Products in DB: ${productCount?.cnt}`);
   if (productCount?.cnt === 0) {
-    // Clear existing data that might have different UUIDs from previous seeds
-    await pgClient`DELETE FROM product_prices`;
-    await pgClient`DELETE FROM products`;
-    await pgClient`DELETE FROM brands`;
-    await pgClient`DELETE FROM categories`;
-    console.log('Cleared existing data for clean seed');
-
-    // Seed from JSON (parameterized queries — safe from SQL injection)
-    const seedPath = path.join(process.cwd(), 'apps/api/src/db/migrations/seed_data.json');
-    console.log(`Seed file exists: ${fs.existsSync(seedPath)}`);
-    if (fs.existsSync(seedPath)) {
-      const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
-      let ok = 0;
-
-      for (const b of seedData.brands) {
-        await pgClient`INSERT INTO brands (id, name, notes) VALUES (${b.id}, ${b.name}, ${b.notes}) ON CONFLICT (name) DO NOTHING`;
-        ok++;
-      }
-      for (const c of seedData.categories) {
-        await pgClient`INSERT INTO categories (id, name) VALUES (${c.id}, ${c.name}) ON CONFLICT (name) DO NOTHING`;
-        ok++;
-      }
-      for (const p of seedData.products) {
-        if (!p.id || !p.brandId || !p.categoryId || !p.name) {
-          console.warn('Skipping invalid product:', p.name || 'no name');
-          continue;
-        }
-        const params = [
-          p.id, p.brandId, p.categoryId,
-          p.code ?? null, p.name, p.description ?? null,
-          p.capacity ?? null, p.unit || 'unit', p.productType || 'general',
-          p.viscosity ?? null,
-          p.crossRefs ? JSON.stringify(p.crossRefs) : null,
-          p.specifications ? JSON.stringify(p.specifications) : null,
-          p.extras ? JSON.stringify(p.extras) : null,
-          p.isActive ?? true, p.currentStock ?? 0, p.minStockThreshold ?? 0
-        ].map(v => v === undefined ? null : v);
-        await pgClient.unsafe(
-          `INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13::jsonb, $14, $15, $16) ON CONFLICT (id) DO NOTHING`,
-          params
-        );
-        ok++;
-      }
-      for (const pr of seedData.prices) {
-        const ef = pr.effectiveFrom || new Date().toISOString();
-        const pParams = [pr.id, pr.productId, pr.priceType, pr.price, ef].map(v => v === undefined ? null : v);
-        await pgClient.unsafe(
-          `INSERT INTO product_prices (id, product_id, price_type, price, effective_from) VALUES ($1::uuid, $2::uuid, $3, $4, $5::timestamptz) ON CONFLICT (id) DO NOTHING`,
-          pParams
-        );
-        ok++;
-      }
-
-      console.log(`Seed complete: ${ok} rows inserted`);
-    }
+    console.log('Starting background seed...');
+    runSeedInBackground().catch(err => console.error('Seed error:', err?.message?.substring(0, 100)));
   }
 
   console.log('Migrations applied');
+}
+
+async function runSeedInBackground(): Promise<void> {
+  await pgClient`DELETE FROM product_prices`;
+  await pgClient`DELETE FROM products`;
+  await pgClient`DELETE FROM brands`;
+  await pgClient`DELETE FROM categories`;
+
+  const seedPath = require('path').join(process.cwd(), 'apps/api/src/db/migrations/seed_data.json');
+  const seedData = JSON.parse(require('fs').readFileSync(seedPath, 'utf-8'));
+  let ok = 0;
+
+  for (const b of seedData.brands) {
+    await pgClient`INSERT INTO brands (id, name, notes) VALUES (${b.id}, ${b.name}, ${b.notes}) ON CONFLICT (name) DO NOTHING`;
+    ok++;
+  }
+  for (const c of seedData.categories) {
+    await pgClient`INSERT INTO categories (id, name) VALUES (${c.id}, ${c.name}) ON CONFLICT (name) DO NOTHING`;
+    ok++;
+  }
+
+  // Batch insert products (100 at a time)
+  for (let i = 0; i < seedData.products.length; i += 100) {
+    const batch = seedData.products.slice(i, i + 100);
+    for (const p of batch) {
+      if (!p.id || !p.brandId || !p.categoryId || !p.name) continue;
+      const params = [
+        p.id, p.brandId, p.categoryId, p.code ?? null, p.name, p.description ?? null,
+        p.capacity ?? null, p.unit || 'unit', p.productType || 'general', p.viscosity ?? null,
+        p.crossRefs ? JSON.stringify(p.crossRefs) : null,
+        p.specifications ? JSON.stringify(p.specifications) : null,
+        p.extras ? JSON.stringify(p.extras) : null,
+        p.isActive ?? true, p.currentStock ?? 0, p.minStockThreshold ?? 0
+      ].map((v: unknown) => v === undefined ? null : v);
+      await pgClient.unsafe(
+        `INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13::jsonb, $14, $15, $16) ON CONFLICT (id) DO NOTHING`,
+        params
+      );
+      ok++;
+    }
+  }
+
+  for (const pr of seedData.prices) {
+    const ef = pr.effectiveFrom || new Date().toISOString();
+    const pParams = [pr.id, pr.productId, pr.priceType, pr.price, ef].map((v: unknown) => v === undefined ? null : v);
+    await pgClient.unsafe(
+      `INSERT INTO product_prices (id, product_id, price_type, price, effective_from) VALUES ($1::uuid, $2::uuid, $3, $4, $5::timestamptz) ON CONFLICT (id) DO NOTHING`,
+      pParams
+    );
+    ok++;
+  }
+
+  console.log(`Seed complete: ${ok} rows inserted`);
 }
