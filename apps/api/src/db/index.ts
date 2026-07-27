@@ -96,8 +96,9 @@ export async function runMigrations(): Promise<void> {
       }
       for (const p of seedData.products) {
         const toNull = (v: unknown) => v === undefined ? null : v;
-        const toJsonb = (v: unknown): string | null => v != null ? JSON.stringify(v) as string : null;
-        await pgClient`INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES (${p.id}, ${p.brandId}, ${p.categoryId}, ${toNull(p.code)}, ${p.name}, ${toNull(p.description)}, ${toNull(p.capacity)}, ${p.unit || 'unit'}, ${p.productType || 'general'}, ${toNull(p.viscosity)}, ${toJsonb(p.crossRefs)}, ${toJsonb(p.specifications)}, ${toJsonb(p.extras)}, ${p.isActive ?? true}, ${p.currentStock ?? 0}, ${p.minStockThreshold ?? 0}) ON CONFLICT (id) DO NOTHING`;
+        await pgClient.unsafe(`INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13::jsonb, $14, $15, $16) ON CONFLICT (id) DO NOTHING`,
+          [p.id, p.brandId, p.categoryId, toNull(p.code), p.name, toNull(p.description), toNull(p.capacity), p.unit || 'unit', p.productType || 'general', toNull(p.viscosity), p.crossRefs != null ? JSON.stringify(p.crossRefs) : null, p.specifications != null ? JSON.stringify(p.specifications) : null, p.extras != null ? JSON.stringify(p.extras) : null, p.isActive ?? true, p.currentStock ?? 0, p.minStockThreshold ?? 0]
+        );
         ok++;
       }
       for (const pr of seedData.prices) {
