@@ -73,7 +73,7 @@ export async function runMigrations(): Promise<void> {
   console.log(`Products in DB: ${productCount?.cnt}`);
   if (productCount?.cnt === 0) {
     console.log('Starting background seed...');
-    runSeedInBackground().catch(err => console.error('Seed error:', err?.message?.substring(0, 100)));
+    runSeedInBackground().catch(err => console.error('Seed error:', err?.stack || err?.message));
   }
 
   console.log('Migrations applied');
