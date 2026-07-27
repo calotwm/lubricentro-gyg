@@ -68,9 +68,9 @@ export async function runMigrations(): Promise<void> {
     console.log('Default admin user created (admin / admin123)');
   }
 
-  // Seed data if DB is empty (brands empty = first run)
-  const [brandCount] = await pgClient`SELECT COUNT(*)::int as cnt FROM brands`;
-  if (brandCount?.cnt === 0) {
+  // Seed data if products table is empty
+  const [productCount] = await pgClient`SELECT COUNT(*)::int as cnt FROM products`;
+  if (productCount?.cnt === 0) {
     // Run seed SQL
     const seedPath = path.join(process.cwd(), 'apps/api/src/db/migrations/0001_seed_data.sql');
     if (fs.existsSync(seedPath)) {

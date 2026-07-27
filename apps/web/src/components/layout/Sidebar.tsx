@@ -7,7 +7,6 @@ const navItems = [
   { to: '/stock', label: 'Stock', icon: Warehouse },
   { to: '/reports', label: 'Reports', icon: FileText },
   { to: '/admin/users', label: 'Users', icon: Users },
-  { to: '/admin/import', label: 'Importar Excel', icon: Upload },
 ];
 
 export function Sidebar() {
