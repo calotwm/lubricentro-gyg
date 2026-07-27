@@ -72,6 +72,13 @@ export async function runMigrations(): Promise<void> {
   const [productCount] = await pgClient`SELECT COUNT(*)::int as cnt FROM products`;
   console.log(`Products in DB: ${productCount?.cnt}`);
   if (productCount?.cnt === 0) {
+    // Clear existing data that might have different UUIDs from previous seeds
+    await pgClient`DELETE FROM product_prices`;
+    await pgClient`DELETE FROM products`;
+    await pgClient`DELETE FROM brands`;
+    await pgClient`DELETE FROM categories`;
+    console.log('Cleared existing data for clean seed');
+
     // Run seed SQL
     const seedPath = path.join(process.cwd(), 'apps/api/src/db/migrations/0001_seed_data.sql');
     console.log(`Seed file exists: ${fs.existsSync(seedPath)}`);
@@ -91,7 +98,7 @@ export async function runMigrations(): Promise<void> {
           }
         }
       }
-      console.log(`Seed complete: ${ok} OK, ${fail} skipped`);
+      console.log(`Seed complete: ${ok} OK, ${fail} failed`);
     }
   }
 
