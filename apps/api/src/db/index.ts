@@ -95,15 +95,33 @@ export async function runMigrations(): Promise<void> {
         ok++;
       }
       for (const p of seedData.products) {
-        const toNull = (v: unknown) => v === undefined ? null : v;
-        await pgClient.unsafe(`INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13::jsonb, $14, $15, $16) ON CONFLICT (id) DO NOTHING`,
-          [p.id, p.brandId, p.categoryId, toNull(p.code), p.name, toNull(p.description), toNull(p.capacity), p.unit || 'unit', p.productType || 'general', toNull(p.viscosity), p.crossRefs != null ? JSON.stringify(p.crossRefs) : null, p.specifications != null ? JSON.stringify(p.specifications) : null, p.extras != null ? JSON.stringify(p.extras) : null, p.isActive ?? true, p.currentStock ?? 0, p.minStockThreshold ?? 0]
+        if (!p.id || !p.brandId || !p.categoryId || !p.name) {
+          console.warn('Skipping invalid product:', p.name || 'no name');
+          continue;
+        }
+        const params = [
+          p.id, p.brandId, p.categoryId,
+          p.code ?? null, p.name, p.description ?? null,
+          p.capacity ?? null, p.unit || 'unit', p.productType || 'general',
+          p.viscosity ?? null,
+          p.crossRefs ? JSON.stringify(p.crossRefs) : null,
+          p.specifications ? JSON.stringify(p.specifications) : null,
+          p.extras ? JSON.stringify(p.extras) : null,
+          p.isActive ?? true, p.currentStock ?? 0, p.minStockThreshold ?? 0
+        ].map(v => v === undefined ? null : v);
+        await pgClient.unsafe(
+          `INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13::jsonb, $14, $15, $16) ON CONFLICT (id) DO NOTHING`,
+          params
         );
         ok++;
       }
       for (const pr of seedData.prices) {
         const ef = pr.effectiveFrom || new Date().toISOString();
-        await pgClient`INSERT INTO product_prices (id, product_id, price_type, price, effective_from) VALUES (${pr.id}, ${pr.productId}, ${pr.priceType}, ${pr.price}, ${ef}::timestamptz) ON CONFLICT (id) DO NOTHING`;
+        const pParams = [pr.id, pr.productId, pr.priceType, pr.price, ef].map(v => v === undefined ? null : v);
+        await pgClient.unsafe(
+          `INSERT INTO product_prices (id, product_id, price_type, price, effective_from) VALUES ($1::uuid, $2::uuid, $3, $4, $5::timestamptz) ON CONFLICT (id) DO NOTHING`,
+          pParams
+        );
         ok++;
       }
 
