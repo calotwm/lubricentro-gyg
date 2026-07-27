@@ -80,14 +80,20 @@ export async function runMigrations(): Promise<void> {
 }
 
 async function runSeedInBackground(): Promise<void> {
-  await pgClient`DELETE FROM product_prices`;
-  await pgClient`DELETE FROM products`;
-  await pgClient`DELETE FROM brands`;
-  await pgClient`DELETE FROM categories`;
+  try {
+    await pgClient`DELETE FROM product_prices`.catch(() => {});
+    await pgClient`DELETE FROM products`.catch(() => {});
+    await pgClient`DELETE FROM brands`.catch(() => {});
+    await pgClient`DELETE FROM categories`.catch(() => {});
 
-  const seedPath = require('path').join(process.cwd(), 'apps/api/src/db/migrations/seed_data.json');
-  const seedData = JSON.parse(require('fs').readFileSync(seedPath, 'utf-8'));
-  let ok = 0;
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const seedPath = path.join(process.cwd(), 'apps/api/src/db/migrations/seed_data.json');
+    console.log('Reading seed from:', seedPath);
+    const exists = fs.existsSync(seedPath);
+    if (!exists) { console.log('Seed file not found:', seedPath); return; }
+    const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
+    let ok = 0;
 
   for (const b of seedData.brands) {
     await pgClient`INSERT INTO brands (id, name, notes) VALUES (${b.id}, ${b.name}, ${b.notes}) ON CONFLICT (name) DO NOTHING`;
@@ -130,4 +136,7 @@ async function runSeedInBackground(): Promise<void> {
   }
 
   console.log(`Seed complete: ${ok} rows inserted`);
+  } catch (err: any) {
+    console.error('Seed failed:', err?.message?.substring(0, 200));
+  }
 }
