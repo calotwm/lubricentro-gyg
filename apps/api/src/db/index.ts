@@ -79,26 +79,31 @@ export async function runMigrations(): Promise<void> {
     await pgClient`DELETE FROM categories`;
     console.log('Cleared existing data for clean seed');
 
-    // Run seed SQL
-    const seedPath = path.join(process.cwd(), 'apps/api/src/db/migrations/0001_seed_data.sql');
+    // Seed from JSON (parameterized queries — safe from SQL injection)
+    const seedPath = path.join(process.cwd(), 'apps/api/src/db/migrations/seed_data.json');
     console.log(`Seed file exists: ${fs.existsSync(seedPath)}`);
     if (fs.existsSync(seedPath)) {
-      const seedSQL = fs.readFileSync(seedPath, 'utf-8');
-      const seedStatements = seedSQL.split(';').filter(s => s.trim());
-      let ok = 0, fail = 0;
-      for (const stmt of seedStatements) {
-        try {
-          await pgClient.unsafe(stmt.trim() + ';');
-          ok++;
-        } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err);
-          fail++;
-          if (!msg.includes('already exists') && !msg.includes('unique constraint')) {
-            console.warn('Seed warning:', msg.substring(0, 150));
-          }
-        }
+      const seedData = JSON.parse(fs.readFileSync(seedPath, 'utf-8'));
+      let ok = 0;
+
+      for (const b of seedData.brands) {
+        await pgClient`INSERT INTO brands (id, name, notes) VALUES (${b.id}, ${b.name}, ${b.notes}) ON CONFLICT (name) DO NOTHING`;
+        ok++;
       }
-      console.log(`Seed complete: ${ok} OK, ${fail} failed`);
+      for (const c of seedData.categories) {
+        await pgClient`INSERT INTO categories (id, name) VALUES (${c.id}, ${c.name}) ON CONFLICT (name) DO NOTHING`;
+        ok++;
+      }
+      for (const p of seedData.products) {
+        await pgClient`INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES (${p.id}, ${p.brandId}, ${p.categoryId}, ${p.code}, ${p.name}, ${p.description}, ${p.capacity}, ${p.unit}, ${p.productType}, ${p.viscosity}, ${p.crossRefs}, ${p.specifications}, ${p.extras}, ${p.isActive}, ${p.currentStock}, ${p.minStockThreshold}) ON CONFLICT (id) DO NOTHING`;
+        ok++;
+      }
+      for (const pr of seedData.prices) {
+        await pgClient`INSERT INTO product_prices (id, product_id, price_type, price, effective_from) VALUES (${pr.id}, ${pr.productId}, ${pr.priceType}, ${pr.price}, ${pr.effectiveFrom}::timestamptz) ON CONFLICT (id) DO NOTHING`;
+        ok++;
+      }
+
+      console.log(`Seed complete: ${ok} rows inserted`);
     }
   }
 
