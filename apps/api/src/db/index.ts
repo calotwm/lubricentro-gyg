@@ -96,7 +96,7 @@ export async function runMigrations(): Promise<void> {
       }
       for (const p of seedData.products) {
         const toNull = (v: unknown) => v === undefined ? null : v;
-        const toJsonb = (v: unknown) => v != null ? JSON.stringify(v) : null;
+        const toJsonb = (v: unknown): string | null => v != null ? JSON.stringify(v) as string : null;
         await pgClient`INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES (${p.id}, ${p.brandId}, ${p.categoryId}, ${toNull(p.code)}, ${p.name}, ${toNull(p.description)}, ${toNull(p.capacity)}, ${p.unit || 'unit'}, ${p.productType || 'general'}, ${toNull(p.viscosity)}, ${toJsonb(p.crossRefs)}, ${toJsonb(p.specifications)}, ${toJsonb(p.extras)}, ${p.isActive ?? true}, ${p.currentStock ?? 0}, ${p.minStockThreshold ?? 0}) ON CONFLICT (id) DO NOTHING`;
         ok++;
       }
