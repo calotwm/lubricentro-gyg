@@ -110,7 +110,7 @@ async function runSeedInBackground(): Promise<void> {
         p.specifications ? JSON.stringify(p.specifications) : null,
         p.extras ? JSON.stringify(p.extras) : null,
         p.isActive ?? true, p.currentStock ?? 0, p.minStockThreshold ?? 0
-      ].map((v: unknown) => v === undefined ? null : v);
+      ] as any[];
       await pgClient.unsafe(
         `INSERT INTO products (id, brand_id, category_id, code, name, description, capacity, unit, product_type, viscosity, cross_refs, specifications, extras, is_active, current_stock, min_stock_threshold) VALUES ($1::uuid, $2::uuid, $3::uuid, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, $12::jsonb, $13::jsonb, $14, $15, $16) ON CONFLICT (id) DO NOTHING`,
         params
@@ -121,7 +121,7 @@ async function runSeedInBackground(): Promise<void> {
 
   for (const pr of seedData.prices) {
     const ef = pr.effectiveFrom || new Date().toISOString();
-    const pParams = [pr.id, pr.productId, pr.priceType, pr.price, ef].map((v: unknown) => v === undefined ? null : v);
+    const pParams = [pr.id, pr.productId, pr.priceType, pr.price, ef] as any[];
     await pgClient.unsafe(
       `INSERT INTO product_prices (id, product_id, price_type, price, effective_from) VALUES ($1::uuid, $2::uuid, $3, $4, $5::timestamptz) ON CONFLICT (id) DO NOTHING`,
       pParams
